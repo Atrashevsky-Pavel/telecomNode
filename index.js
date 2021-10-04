@@ -9,36 +9,22 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-async function bootstrap() {
+const bootstrap = async () => {
     connectDb();
-
-    let data;
-    let breedFilter, search;
-
     // get data from DogApi
     await dbService.removeAll();
-    data = await dogApiService.get();
+    const data = await dogApiService.get();
     await dbService.save(data);
-
-
-    app.use((req, res, next) => {
-        if (req.query.breed) {
-            breedFilter = req.query.breed;
-        } else {
-            breedFilter = undefined;
-        }
-        if (req.query.q) {
-            search = req.query.q;
-        } else {
-            search = undefined;
-        }
-        next();
-    });
 
     app.get('/', async (req, res) => {
         console.log('routing');
-        res.json(await dbService.get(breedFilter, search));
+        res.json(await dbService.get());
     });
+    app.post('/', async (req, res) => {
+        const breedFilter = (req.body.breed) ? req.body.breed : undefined;
+        const search = (req.body.search) ? req.body.search : undefined
+        res.json(await dbService.get(breedFilter, search));
+    })
 
     app.listen(3200, () => {
         console.log('App is running');

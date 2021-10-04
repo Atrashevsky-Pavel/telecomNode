@@ -2,44 +2,33 @@ const breedRepo = require('../repositories/breed');
 const dogRepo = require('../repositories/dog');
 
 const get = async (filter = '', search = '') => {
-    let breedFilter = {};
-    let dogFilter = {};
-    if (filter) {
-        breedFilter = {
-            title: filter,
-        };
-    }
-    let breeds = await breedRepo.getAll(breedFilter);
-    let breedsId = breeds.map(function (curr) {
-        return curr._id;
-    });
-    if (breedsId.length) {
-        dogFilter.breedId = breedsId;
-    }
-    if (search.length) {
-        dogFilter.title = new RegExp(search, 'i');
+    console.log(filter);
+    const breedFilter = (filter) ? {title: filter} : {};
+    const breeds = await breedRepo.getAll(breedFilter);
+    const id = (filter) ? String(breeds[0]._id) : undefined;
+    const dogFilter = (id)? {breedId: {_id: id}} : {};
+    if (search) {
+        dogFilter.title = search;
     }
     let dogs = await dogRepo.getAll(dogFilter);
-    let result = dogs.map(function (curr) {
+    const result = dogs.map( (item) => {
         return {
-            breed: breeds.find((el) => curr.breedId + '' == el._id + ''),
-            title: curr.title,
-            image: curr.image,
+            breed: breeds.find((el) => item.breedId + '' == el._id + ''),
+            title: item.title,
+            image: item.image,
         };
     });
     return result;
 };
 
 const save = async (data) => {
-    let breedsData = data.map(function (curr) {
-        return { title: curr.breed };
-    });
-    let breeds = await breedRepo.save(breedsData);
-    let dogsData = data.map(function (curr) {
+    const breedsData = [...new Set(data.map(value => value.breed))].map((item) => {return { title: item }});
+    const breeds = await breedRepo.save(breedsData);
+    const dogsData = data.map((item) => {
         return {
-            breedId: breeds.find((el) => curr.breed == el.title)._id,
-            title: curr.title,
-            image: curr.image,
+            breedId: breeds.find((el) => item.breed == el.title)._id,
+            title: item.title,
+            image: item.image,
         };
     });
     await dogRepo.save(dogsData);

@@ -1,22 +1,14 @@
 const { default: axios } = require('axios');
 const dogApi = 'https://dog.ceo/api/breeds/image/random/50';
+const count = 100;
 
 const getDataFromDogsApi = async () => {
-    let requests = [];
-    for (let i = 0; i < 2; i++) {
-        requests.push(axios.get(dogApi));
-    }
-    return Promise.all(requests);
+    const result = await axios.get(dogApi);
+    return result.data;
 };
 
 const prepareDataFromDogApi = async (data) => {
-    const result = [];
-    for (let i = 0; i < data.length; i++) {
-        for (let j = 0; j < data[i].data.message.length; j++) {
-            result.push(breedParseUrl(data[i].data.message[j]));
-        }
-    }
-    return result;
+    return data.map((item) => breedParseUrl(item));
 };
 
 const breedParseUrl = (url) => {
@@ -29,9 +21,18 @@ const breedParseUrl = (url) => {
     };
 };
 
-const get = async () => {
+const getData = async (arr) => {
     const dataFromApi = await getDataFromDogsApi();
-    const data = await prepareDataFromDogApi(dataFromApi);
+    const data = await prepareDataFromDogApi(dataFromApi.message);
+    let result = arr.concat(data);
+    if (result.length < count) {
+        result = await getData(result);
+    }
+    return result;
+};
+
+const get = async () => {
+    const data = await getData([]);
     return data;
 };
 

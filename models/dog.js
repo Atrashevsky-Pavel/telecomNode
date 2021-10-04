@@ -13,6 +13,7 @@ const Dog = new Schema(
     { collection: 'dogs' }
 );
 
+
 const toResponse = (dog) => {
     const { id, breedId, title, image } = dog;
     return { id, breedId, title, image };
