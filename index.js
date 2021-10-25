@@ -3,33 +3,27 @@ const { connectDb } = require('./utils/db');
 const cors = require('cors');
 const dogApiService = require('./services/dogapi');
 const dbService = require('./services/db');
-const { errorHandler, catchDecorator } = require('./utils/error-handling');
 
 const app = express();
-
 app.use(cors());
 app.use(express.json());
 
 const bootstrap = async () => {
-    await connectDb();
-    // get data from DogApi
-    await dbService.removeAll();
-    const data = await dogApiService.get();
-    await dbService.save(data);
+  await connectDb();
+  await dbService.removeAll();
+  const data = await dogApiService.get();
+  await dbService.save(data);
+  app.get('/breeds', async (req, res) => {
+    res.json(await dbService.getBreeds());
+  });
+  app.post('/dogs', async (req, res) => {
+    res.json(await dbService.getDogs(req.body));
+  });
+  app.listen(3200, () => {
+    console.log('App is running');
+  });
+};
 
-    app.get('/', async (req, res) => {
-        console.log('routing');
-        res.json(await dbService.get());
-    });
-    app.post('/', catchDecorator (async (req, res) => {
-        const breedFilter = (req.body.breed) ? req.body.breed : undefined;
-        const search = (req.body.search) ? req.body.search : undefined
-        res.json(await dbService.get(breedFilter, search));
-    }));
-    app.use(errorHandler);
-
-    app.listen(3200, () => {
-        console.log('App is running');
-    });
-}
-connectDb(bootstrap);
+(async () => {
+  await bootstrap();
+})();

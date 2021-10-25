@@ -1,6 +1,6 @@
 const { Breed } = require('../models/breed');
 
-const getAll = async (breedFilter) => Breed.find(breedFilter);
+const getAll = async () => Breed.find({});
 
 const get = async (id) => Breed.findById(id);
 
