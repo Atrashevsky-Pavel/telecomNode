@@ -13,6 +13,7 @@ const bootstrap = async () => {
   await dbService.removeAll();
   const data = await dogApiService.get();
   await dbService.save(data);
+
   app.get('/breeds', async (req, res) => {
     res.json(await dbService.getBreeds());
   });

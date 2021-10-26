@@ -1,18 +1,46 @@
 const breedRepo = require('../repositories/breed');
 const dogRepo = require('../repositories/dog');
 
-const getBreeds = async () => {
-  return await breedRepo.getAll();
+const getQuantityButton = (pageSize, lengthData) => {
+  if (pageSize > lengthData) {
+    return 0;
+  } else if (pageSize < lengthData) {
+    return Math.round(lengthData / pageSize);
+  } else {
+    return 0;
+  }
 };
 
-const getDogs = async ({ breedId = undefined, title = undefined }) => {
-  const filter = {};
-  if (breedId) {
-    filter.breedId = breedId;
-  } else if (title) {
-    filter.title = title;
-  }
-  return await dogRepo.getAll(filter);
+const getStartIndexAndEndIndex = (page, pageSize, lengthData) => {
+  const start = pageSize * (page - 1);
+  const end = page * pageSize > lengthData ? lengthData : page * pageSize;
+  return pageSize < lengthData ? { start, end } : false;
+};
+
+const getDogs = async ({
+  pagination = { page: 1, pageSize: 10 },
+  filter = {},
+}) => {
+  const data = await dogRepo.getAll(filter);
+  const quantityButtons = getQuantityButton(pagination.pageSize, data.length);
+  const indices = getStartIndexAndEndIndex(
+    pagination.page,
+    pagination.pageSize,
+    data.length
+  );
+  return indices
+    ? {
+        data: data.slice(indices.start, indices.end),
+        quantityButtons,
+      }
+    : {
+        data,
+        quantityButtons,
+      };
+};
+
+const getBreeds = async () => {
+  return await breedRepo.getAll();
 };
 
 const save = async ({ breeds, dogs }) => {
