@@ -5,7 +5,7 @@ const getQuantityButton = (pageSize, lengthData) => {
   if (pageSize > lengthData) {
     return 0;
   } else if (pageSize < lengthData) {
-    return Math.round(lengthData / pageSize);
+    return Math.ceil(lengthData / pageSize);
   } else {
     return 0;
   }
